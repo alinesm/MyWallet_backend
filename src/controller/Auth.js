@@ -64,7 +64,7 @@ export async function signIn(req, res) {
       const token = uuidV4();
 
       await db.collection("sections").insertOne({ token, userId: user._id });
-      res.send(token);
+      res.send({ token: token, name: user.name });
     } else {
       res.status(401).send("email ou senha incorretos!");
     }

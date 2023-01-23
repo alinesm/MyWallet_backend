@@ -13,14 +13,14 @@ export async function listEntries(req, res) {
     if (!token || !checkSession)
       return res
         .status(401)
-        .send("Você não tem autorização para cadastrar uma receita");
+        .send("Você não tem autorização para realizar os cadastros");
 
     const data = await db
       .collection("data")
       .find({ userId: checkSession.userId })
       .toArray();
 
-    console.log(data);
+    // console.log(data);
 
     return res.send(data);
   } catch (error) {
@@ -50,28 +50,28 @@ export async function createEntrie(req, res) {
     if (!checkSession)
       return res
         .status(401)
-        .send("Você não tem autorização para cadastrar uma receita");
+        .send("Você não tem autorização para realizar os cadastros");
 
-    // const dataUserLogged = await db
-    //   .collection("data")
-    //   .find({ userId: checkSession.userId })
-    //   .toArray();
+    const dataUserLogged = await db
+      .collection("data")
+      .find({ userId: checkSession.userId })
+      .toArray();
 
-    // const dataExist = dataUserLogged.findOne({
-    //   description: data.description,
-    // });
+    const dataExist = dataUserLogged.some(
+      (item) => item.description === data.description
+    );
+    console.log(dataExist);
 
-    // if (dataExist)
-    //   return res.status(409).send("Essa receita já está cadastrada!");
+    if (dataExist)
+      return res.status(409).send("Essa descriçào ja foi adicionada!");
 
-    const dataSent = await db.collection("data").insertOne({
+    await db.collection("data").insertOne({
       description: data.description,
       value: data.value,
       type: "entry",
       date: dayjs().format("DD/MM/YYYY"),
       userId: checkSession.userId,
     });
-    console.log(dataSent);
     res.send("ok");
   } catch (err) {
     console.log(err);
@@ -103,12 +103,18 @@ export async function createOutflow(req, res) {
         .status(401)
         .send("Você não tem autorização para cadastrar uma receita");
 
-    // const dataExist = await db
-    //   .collection("data")
-    //   .findOne({ description: data.description });
+    const dataUserLogged = await db
+      .collection("data")
+      .find({ userId: checkSession.userId })
+      .toArray();
 
-    // if (dataExist)
-    //   return res.status(409).send("Essa receita já está cadastrada!");
+    const dataExist = dataUserLogged.some(
+      (item) => item.description === data.description
+    );
+    console.log(dataExist);
+
+    if (dataExist)
+      return res.status(409).send("Essa descrição ja foi adicionada!");
 
     const dataSent = await db.collection("data").insertOne({
       description: data.description,
